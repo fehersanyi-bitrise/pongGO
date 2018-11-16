@@ -11,8 +11,7 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 )
 
-func main() {
-
+func initSdl() {
 	// This part initialises sdl for the project
 	err := sdl.Init(sdl.INIT_EVERYTHING)
 	if err != nil {
@@ -20,6 +19,11 @@ func main() {
 		os.Exit(2)
 	}
 	defer sdl.Quit()
+}
+
+func main() {
+
+	initSdl()
 
 	// initialise string output with ttf package
 	if err := ttf.Init(); err != nil {
