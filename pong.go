@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/veandco/go-sdl2/img"
+	img "github.com/veandco/go-sdl2/img"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -55,43 +55,17 @@ func welcomeScene(title string, font *ttf.Font) *sdl.Surface {
 	return surface
 }
 
-func main() {
-
-	initSdl()
-	initTtf()
-	window, renderer := createWindorAndRenderer(800, 600)
-	font := openingFont("resources/fonts/Arial.ttf")
-	surface := welcomeScene("PongGo", font)
-
-	defer sdl.Quit()
-	defer ttf.Quit()
-	defer window.Destroy()
-	defer font.Close()
-
-	renderer.Clear()
-
-	defer surface.Free()
-	// creating texture from the surface
-	texture, err := renderer.CreateTextureFromSurface(surface)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not create texture %v", err)
-	}
-	defer texture.Destroy()
-	err = renderer.Copy(texture, nil, nil)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not copy texture %v", err)
-	}
-	renderer.Present()
-	//just to see the window, as the loop comes in it will be removed
-	time.Sleep(time.Second * 3)
-
+func drawBackground(image string, renderer *sdl.Renderer, texture *sdl.Texture) {
 	// background here
-	renderer.Clear()
-	texture, err = img.LoadTexture(renderer, "resources/images/background.png")
+
+	background, err := img.LoadTexture(renderer, image)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not load background %v", err)
 	}
+	renderer.Copy(background, nil, nil)
+}
 
+func drawPlayersAndBall(renderer *sdl.Renderer, texture *sdl.Texture) {
 	//rendering players
 	hitBox1 := &sdl.Rect{X: 5, Y: 240, W: 32, H: 120}
 	hitBox2 := &sdl.Rect{X: 800 - 37, Y: 240, W: 32, H: 120}
@@ -110,11 +84,53 @@ func main() {
 		fmt.Fprintf(os.Stderr, "could not load ball image %v", err)
 	}
 
-	renderer.Copy(texture, nil, nil)
 	renderer.Copy(player1, nil, hitBox1)
 	renderer.Copy(player2, nil, hitBox2)
 	renderer.Copy(ball, nil, ballBox)
-	renderer.Present()
 
+}
+
+func createTextureFromSurface(renderer *sdl.Renderer, surface *sdl.Surface) *sdl.Texture {
+	// creating texture from the surface
+	texture, err := renderer.CreateTextureFromSurface(surface)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not create texture %v", err)
+	}
+	return texture
+}
+
+func drawTitle(renderer *sdl.Renderer, texture *sdl.Texture) {
+	renderer.Clear()
+	renderer.Copy(texture, nil, nil)
+	renderer.Present()
+	//just to see the window, as the loop comes in it will be removed
+	time.Sleep(time.Second * 3)
+}
+
+func drawGame(renderer *sdl.Renderer, texture *sdl.Texture) {
+	renderer.Clear()
+	drawBackground("resources/images/background.png", renderer, texture)
+	drawPlayersAndBall(renderer, texture)
+	renderer.Present()
+}
+
+func main() {
+
+	initSdl()
+	initTtf()
+	window, renderer := createWindorAndRenderer(800, 600)
+	font := openingFont("resources/fonts/Arial.ttf")
+	surface := welcomeScene("PongGo", font)
+	texture := createTextureFromSurface(renderer, surface)
+	defer sdl.Quit()
+	defer ttf.Quit()
+	defer window.Destroy()
+	defer font.Close()
+	defer surface.Free()
+	defer texture.Destroy()
+
+	drawTitle(renderer, texture)
+
+	drawGame(renderer, texture)
 	time.Sleep(time.Second * 5)
 }
