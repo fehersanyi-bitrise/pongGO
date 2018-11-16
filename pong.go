@@ -28,18 +28,22 @@ func initTtf() {
 	}
 }
 
-func main() {
-
-	initSdl()
-	initTtf()
-	defer sdl.Quit()
-	defer ttf.Quit()
-
+func createWindorAndRenderer() (*sdl.Window, *sdl.Renderer) {
 	// creating a windor and the renderer
 	window, renderer, err := sdl.CreateWindowAndRenderer(800, 600, sdl.WINDOW_SHOWN)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not create window %v", err)
 	}
+	return window, renderer
+}
+
+func main() {
+
+	initSdl()
+	initTtf()
+	window, renderer := createWindorAndRenderer()
+	defer sdl.Quit()
+	defer ttf.Quit()
 	defer window.Destroy()
 	renderer.Clear()
 	//now we create the title
