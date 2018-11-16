@@ -28,36 +28,48 @@ func initTtf() {
 	}
 }
 
-func createWindorAndRenderer() (*sdl.Window, *sdl.Renderer) {
+func createWindorAndRenderer(w, h int32) (*sdl.Window, *sdl.Renderer) {
 	// creating a windor and the renderer
-	window, renderer, err := sdl.CreateWindowAndRenderer(800, 600, sdl.WINDOW_SHOWN)
+	window, renderer, err := sdl.CreateWindowAndRenderer(w, h, sdl.WINDOW_SHOWN)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not create window %v", err)
 	}
 	return window, renderer
 }
 
+func openingFont(path string) *ttf.Font {
+	//now we create the title
+	font, err := ttf.OpenFont(path, 20)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not create font %v", err)
+	}
+	return font
+}
+
+func welcomeScene(title string, font *ttf.Font) *sdl.Surface {
+	color := sdl.Color{R: 255, G: 255, B: 255, A: 255}
+	surface, err := font.RenderUTF8Solid(title, color)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Could not write out title %v", err)
+	}
+	return surface
+}
+
 func main() {
 
 	initSdl()
 	initTtf()
-	window, renderer := createWindorAndRenderer()
+	window, renderer := createWindorAndRenderer(800, 600)
+	font := openingFont("resources/fonts/Arial.ttf")
+	surface := welcomeScene("PongGo", font)
+
 	defer sdl.Quit()
 	defer ttf.Quit()
 	defer window.Destroy()
-	renderer.Clear()
-	//now we create the title
-	font, err := ttf.OpenFont("resources/fonts/Arial.ttf", 20)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not create font %v", err)
-	}
 	defer font.Close()
 
-	color := sdl.Color{R: 255, G: 255, B: 255, A: 255}
-	surface, err := font.RenderUTF8Solid("PongGo", color)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not write out title %v", err)
-	}
+	renderer.Clear()
+
 	defer surface.Free()
 	// creating texture from the surface
 	texture, err := renderer.CreateTextureFromSurface(surface)
