@@ -18,17 +18,21 @@ func initSdl() {
 		fmt.Fprintf(os.Stderr, "Could not init %v", err)
 		os.Exit(2)
 	}
-	defer sdl.Quit()
+
+}
+
+func initTtf() {
+	// initialise string output with ttf package
+	if err := ttf.Init(); err != nil {
+		fmt.Fprintf(os.Stderr, "Could not init font %v", err)
+	}
 }
 
 func main() {
 
 	initSdl()
-
-	// initialise string output with ttf package
-	if err := ttf.Init(); err != nil {
-		fmt.Fprintf(os.Stderr, "Could not init font %v", err)
-	}
+	initTtf()
+	defer sdl.Quit()
 	defer ttf.Quit()
 
 	// creating a windor and the renderer
