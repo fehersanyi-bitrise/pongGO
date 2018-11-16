@@ -5,9 +5,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/veandco/go-sdl2/ttf"
+	"github.com/veandco/go-sdl2/img"
 
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
 func main() {
@@ -58,5 +59,15 @@ func main() {
 	}
 	renderer.Present()
 	//just to see the window, as the loop comes in it will be removed
+	time.Sleep(time.Second * 3)
+
+	// background here
+	renderer.Clear()
+	texture, err = img.LoadTexture(renderer, "resources/images/background.png")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not load background %v", err)
+	}
+	renderer.Copy(texture, nil, nil)
+	renderer.Present()
 	time.Sleep(time.Second * 5)
 }
