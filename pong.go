@@ -127,7 +127,7 @@ func drawGame(renderer *sdl.Renderer, texture *sdl.Texture) {
 func updatePlayerOne(key *sdl.KeyboardEvent) {
 	if key.Keysym.Scancode == sdl.SCANCODE_UP {
 		if hitBox1.Y >= 5 {
-			hitBox1.Y -= 10
+			hitBox1.Y -= 12
 		}
 	} else if key.Keysym.Scancode == sdl.SCANCODE_DOWN {
 		if hitBox1.Y <= height-playerHight-5 {
@@ -139,7 +139,7 @@ func updatePlayerOne(key *sdl.KeyboardEvent) {
 func updatePlayerTwo(key *sdl.KeyboardEvent) {
 	if key.Keysym.Scancode == sdl.SCANCODE_W {
 		if hitBox2.Y >= 5 {
-			hitBox2.Y -= 10
+			hitBox2.Y -= 12
 		}
 	} else if key.Keysym.Scancode == sdl.SCANCODE_S {
 		if hitBox2.Y <= height-playerHight-5 {
