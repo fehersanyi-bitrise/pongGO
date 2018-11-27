@@ -12,13 +12,20 @@ import (
 )
 
 const (
-	height = 600
-	width  = 800
+	height       = 600
+	width        = 800
+	playerHight  = 120
+	playerWidth  = 32
+	playerBorder = 10
+	ballHeight   = 16
+	ballWidth    = 16
 )
 
-var hitBox1 = &sdl.Rect{X: 5, Y: 240, W: 32, H: 120}
-var hitBox2 = &sdl.Rect{X: 800 - 37, Y: 240, W: 32, H: 120}
-var ballBox = &sdl.Rect{X: 400 - 8, Y: 300 - 8, W: 16, H: 16}
+var xVelocity int32 = 1
+var yVelocity int32 = 1
+var hitBox1 = &sdl.Rect{X: width - playerWidth, Y: 240, W: playerWidth, H: playerHight}
+var hitBox2 = &sdl.Rect{X: 0, Y: 240, W: playerWidth, H: playerHight}
+var ballBox = &sdl.Rect{X: width/2 - ballWidth/2, Y: height/2 - ballHeight/2, W: ballWidth, H: ballHeight}
 
 func initSdl() {
 	// This part initialises sdl for the project
@@ -76,8 +83,6 @@ func drawBackground(image string, renderer *sdl.Renderer, texture *sdl.Texture) 
 }
 
 func drawPlayersAndBall(renderer *sdl.Renderer, texture *sdl.Texture) {
-	//rendering players
-
 	player1, err := img.LoadTexture(renderer, "resources/images/player.png")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not load player1 image %v", err)
@@ -90,11 +95,9 @@ func drawPlayersAndBall(renderer *sdl.Renderer, texture *sdl.Texture) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not load ball image %v", err)
 	}
-
 	renderer.Copy(player1, nil, hitBox1)
 	renderer.Copy(player2, nil, hitBox2)
 	renderer.Copy(ball, nil, ballBox)
-
 }
 
 func createTextureFromSurface(renderer *sdl.Renderer, surface *sdl.Surface) *sdl.Texture {
@@ -121,6 +124,60 @@ func drawGame(renderer *sdl.Renderer, texture *sdl.Texture) {
 	renderer.Present()
 }
 
+func updatePlayerOne(key *sdl.KeyboardEvent) {
+	if key.Keysym.Scancode == sdl.SCANCODE_UP {
+		if hitBox1.Y >= 5 {
+			hitBox1.Y -= 10
+		}
+	} else if key.Keysym.Scancode == sdl.SCANCODE_DOWN {
+		if hitBox1.Y <= height-playerHight-5 {
+			hitBox1.Y += 10
+		}
+	}
+}
+
+func updatePlayerTwo(key *sdl.KeyboardEvent) {
+	if key.Keysym.Scancode == sdl.SCANCODE_W {
+		if hitBox2.Y >= 5 {
+			hitBox2.Y -= 10
+		}
+	} else if key.Keysym.Scancode == sdl.SCANCODE_S {
+		if hitBox2.Y <= height-playerHight-5 {
+			hitBox2.Y += 10
+		}
+	}
+}
+
+func collisionDetection() {
+	if ballBox.X+ballBox.W == hitBox1.X+playerBorder && ballBox.Y+ballBox.H >= hitBox1.Y && ballBox.Y < hitBox1.Y+hitBox1.H ||
+		ballBox.X == hitBox2.X+hitBox2.W-playerBorder && ballBox.Y+ballBox.H >= hitBox2.Y && ballBox.Y < hitBox2.Y+hitBox2.H {
+		xVelocity = -xVelocity
+	}
+}
+
+func bounceFromWall() {
+	if ballBox.Y < 0 || ballBox.Y > height-ballBox.H/2 {
+		yVelocity = -yVelocity
+	}
+}
+
+func resetBallPosition() {
+	if ballBox.X < 0 || ballBox.X > width {
+		ballBox.X = width/2 - ballWidth/2
+		ballBox.Y = height/2 - ballHeight/2
+		time.Sleep(time.Second)
+	}
+}
+
+func updateBall() {
+
+	ballBox.X += xVelocity
+	ballBox.Y += yVelocity
+
+	bounceFromWall()
+	resetBallPosition()
+	collisionDetection()
+}
 func main() {
 
 	initSdl()
@@ -138,40 +195,18 @@ func main() {
 
 	drawTitle(renderer, texture)
 	for running {
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch key := event.(type) {
 			case *sdl.QuitEvent:
-				println("Quit")
 				running = false
 				break
 			case *sdl.KeyboardEvent:
-
-				// movement of the player1
-				if key.Keysym.Scancode == sdl.SCANCODE_UP {
-					if hitBox1.Y >= 5 {
-						hitBox1.Y -= 10
-					}
-					break
-				} else if key.Keysym.Scancode == sdl.SCANCODE_DOWN {
-					if hitBox1.Y <= height-5 {
-						hitBox1.Y += 10
-					}
-					break
-				}
-				// movement of player2
-				if key.Keysym.Scancode == sdl.SCANCODE_W {
-					if hitBox1.Y >= 5 {
-						hitBox1.Y -= 10
-					}
-					break
-				} else if key.Keysym.Scancode == sdl.SCANCODE_S {
-					if hitBox1.Y <= height-5 {
-						hitBox1.Y += 10
-					}
-					break
-				}
+				updatePlayerOne(key)
+				updatePlayerTwo(key)
 			}
 		}
+		updateBall()
 		drawGame(renderer, texture)
 	}
 }
