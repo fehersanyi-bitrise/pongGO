@@ -193,8 +193,8 @@ func resetBallPosition() {
 	if ballBox.X < 0 {
 		ballBox.X = width/2 - ballWidth/2
 		ballBox.Y = height/2 - ballHeight/2
-		if p2score < 9 {
-			p2score++
+		if p1score < 9 {
+			p1score++
 		} else {
 			p2score = 0
 			p1score = 0
@@ -203,8 +203,8 @@ func resetBallPosition() {
 	} else if ballBox.X > width {
 		ballBox.X = width/2 - ballWidth/2
 		ballBox.Y = height/2 - ballHeight/2
-		if p1score < 9 {
-			p1score++
+		if p2score < 9 {
+			p2score++
 		} else {
 			p1score = 0
 			p2score = 0
