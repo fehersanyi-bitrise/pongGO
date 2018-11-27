@@ -7,9 +7,18 @@ import (
 
 	img "github.com/veandco/go-sdl2/img"
 
-	"github.com/veandco/go-sdl2/sdl"
+	sdl "github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
+
+const (
+	height = 600
+	width  = 800
+)
+
+var hitBox1 = &sdl.Rect{X: 5, Y: 240, W: 32, H: 120}
+var hitBox2 = &sdl.Rect{X: 800 - 37, Y: 240, W: 32, H: 120}
+var ballBox = &sdl.Rect{X: 400 - 8, Y: 300 - 8, W: 16, H: 16}
 
 func initSdl() {
 	// This part initialises sdl for the project
@@ -18,7 +27,7 @@ func initSdl() {
 		fmt.Fprintf(os.Stderr, "Could not init %v", err)
 		os.Exit(2)
 	}
-
+	defer sdl.Quit()
 }
 
 func initTtf() {
@@ -26,6 +35,7 @@ func initTtf() {
 	if err := ttf.Init(); err != nil {
 		fmt.Fprintf(os.Stderr, "Could not init font %v", err)
 	}
+
 }
 
 func createWindorAndRenderer(w, h int32) (*sdl.Window, *sdl.Renderer) {
@@ -67,9 +77,6 @@ func drawBackground(image string, renderer *sdl.Renderer, texture *sdl.Texture) 
 
 func drawPlayersAndBall(renderer *sdl.Renderer, texture *sdl.Texture) {
 	//rendering players
-	hitBox1 := &sdl.Rect{X: 5, Y: 240, W: 32, H: 120}
-	hitBox2 := &sdl.Rect{X: 800 - 37, Y: 240, W: 32, H: 120}
-	ballBox := &sdl.Rect{X: 400 - 8, Y: 300 - 8, W: 16, H: 16}
 
 	player1, err := img.LoadTexture(renderer, "resources/images/player.png")
 	if err != nil {
@@ -118,19 +125,53 @@ func main() {
 
 	initSdl()
 	initTtf()
-	window, renderer := createWindorAndRenderer(800, 600)
+	window, renderer := createWindorAndRenderer(width, height)
 	font := openingFont("resources/fonts/Arial.ttf")
 	surface := welcomeScene("PongGo", font)
 	texture := createTextureFromSurface(renderer, surface)
-	defer sdl.Quit()
 	defer ttf.Quit()
 	defer window.Destroy()
 	defer font.Close()
 	defer surface.Free()
 	defer texture.Destroy()
+	var running = true
 
 	drawTitle(renderer, texture)
+	for running {
+		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			switch key := event.(type) {
+			case *sdl.QuitEvent:
+				println("Quit")
+				running = false
+				break
+			case *sdl.KeyboardEvent:
 
-	drawGame(renderer, texture)
-	time.Sleep(time.Second * 5)
+				// movement of the player1
+				if key.Keysym.Scancode == sdl.SCANCODE_UP {
+					if hitBox1.Y >= 5 {
+						hitBox1.Y -= 10
+					}
+					break
+				} else if key.Keysym.Scancode == sdl.SCANCODE_DOWN {
+					if hitBox1.Y <= height-5 {
+						hitBox1.Y += 10
+					}
+					break
+				}
+				// movement of player2
+				if key.Keysym.Scancode == sdl.SCANCODE_W {
+					if hitBox1.Y >= 5 {
+						hitBox1.Y -= 10
+					}
+					break
+				} else if key.Keysym.Scancode == sdl.SCANCODE_S {
+					if hitBox1.Y <= height-5 {
+						hitBox1.Y += 10
+					}
+					break
+				}
+			}
+		}
+		drawGame(renderer, texture)
+	}
 }
