@@ -193,12 +193,20 @@ func resetBallPosition() {
 	if ballBox.X < 0 {
 		ballBox.X = width/2 - ballWidth/2
 		ballBox.Y = height/2 - ballHeight/2
-		p2score++
+		if p2score < 10 {
+			p2score++
+		} else {
+			p2score = 0
+		}
 		time.Sleep(time.Second)
 	} else if ballBox.X > width {
 		ballBox.X = width/2 - ballWidth/2
 		ballBox.Y = height/2 - ballHeight/2
-		p1score++
+		if p1score < 10 {
+			p1score++
+		} else {
+			p1score = 0
+		}
 		time.Sleep(time.Second)
 	}
 }
