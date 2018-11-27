@@ -21,11 +21,25 @@ const (
 	ballWidth    = 16
 )
 
-var xVelocity int32 = 1
-var yVelocity int32 = 1
+var xVelocity int32 = 3 / 2
+var yVelocity int32 = 3 / 2
 var hitBox1 = &sdl.Rect{X: width - playerWidth, Y: 240, W: playerWidth, H: playerHight}
 var hitBox2 = &sdl.Rect{X: 0, Y: 240, W: playerWidth, H: playerHight}
 var ballBox = &sdl.Rect{X: width/2 - ballWidth/2, Y: height/2 - ballHeight/2, W: ballWidth, H: ballHeight}
+var p1score = 0
+var p2score = 0
+var scoreBox1 = &sdl.Rect{X: 450, Y: 100, W: 32, H: 32}
+var scoreBox2 = &sdl.Rect{X: 350 - 32, Y: 100, W: 32, H: 32}
+var numbers = []string{"resources/images/zero.png",
+	"resources/images/one.png",
+	"resources/images/two.png",
+	"resources/images/three.png",
+	"resources/images/four.png",
+	"resources/images/five.png",
+	"resources/images/six.png",
+	"resources/images/seven.png",
+	"resources/images/eight.png",
+	"resources/images/nine.png"}
 
 func initSdl() {
 	// This part initialises sdl for the project
@@ -100,6 +114,19 @@ func drawPlayersAndBall(renderer *sdl.Renderer, texture *sdl.Texture) {
 	renderer.Copy(ball, nil, ballBox)
 }
 
+func drawPoints(renderer *sdl.Renderer) {
+	scoreOne, err := img.LoadTexture(renderer, numbers[p1score])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not load score image %v", err)
+	}
+	scoreTwo, err := img.LoadTexture(renderer, numbers[p2score])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not load score image %v", err)
+	}
+	renderer.Copy(scoreOne, nil, scoreBox1)
+	renderer.Copy(scoreTwo, nil, scoreBox2)
+}
+
 func createTextureFromSurface(renderer *sdl.Renderer, surface *sdl.Surface) *sdl.Texture {
 	// creating texture from the surface
 	texture, err := renderer.CreateTextureFromSurface(surface)
@@ -120,6 +147,7 @@ func drawTitle(renderer *sdl.Renderer, texture *sdl.Texture) {
 func drawGame(renderer *sdl.Renderer, texture *sdl.Texture) {
 	renderer.Clear()
 	drawBackground("resources/images/background.png", renderer, texture)
+	drawPoints(renderer)
 	drawPlayersAndBall(renderer, texture)
 	renderer.Present()
 }
@@ -162,9 +190,15 @@ func bounceFromWall() {
 }
 
 func resetBallPosition() {
-	if ballBox.X < 0 || ballBox.X > width {
+	if ballBox.X < 0 {
 		ballBox.X = width/2 - ballWidth/2
 		ballBox.Y = height/2 - ballHeight/2
+		p2score++
+		time.Sleep(time.Second)
+	} else if ballBox.X > width {
+		ballBox.X = width/2 - ballWidth/2
+		ballBox.Y = height/2 - ballHeight/2
+		p1score++
 		time.Sleep(time.Second)
 	}
 }
